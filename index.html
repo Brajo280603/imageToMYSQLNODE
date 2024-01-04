@@ -1,0 +1,91 @@
+<!-- HTML File -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Upload</title>
+</head>
+
+<body>
+  <input type="file" id="imageInput" accept="image/*" multiple>
+  <input type="text" id="categoryInput">
+  <button onclick="uploadImage()">Upload Image</button>
+
+  <script>
+
+      const reader = new FileReader();
+
+      reader.addEventListener(
+        "load",
+        () => {
+          // convert image file to base64 string
+          preview.src = reader.result;
+        },
+        false,
+      );
+
+      // if (file) {
+      //   // reader.readAsDataURL(file);
+      // }
+
+
+
+    function uploadImage() {
+      const fileInput = document.getElementById('imageInput');
+      const categoryInput = document.getElementById('categoryInput');
+      const files = fileInput.files;
+      const category = categoryInput.value;
+
+      if (files.length != 0) {
+          for(let file of files){
+            console.log(file)
+            file = URL.createObjectURL(file)
+            console.log(file)
+            // reader.readAsDataURL(file);
+            if (file) {
+                  const formData = new FormData();
+                  formData.append('image', file);
+                  formData.append('category',category);
+
+                  console.log(formData)
+
+                  fetch('/upload', {
+                      method: 'POST',
+                      body: formData
+                  })
+                  .then(response => response.json())
+                  .then(data => console.log(data))
+                  .catch(error => console.error('Error:', error));
+              } else {
+                  console.error('Please select an image to upload.');
+              }
+          }
+      } else {
+        let file = files[0];
+        file = URL.createObjectURL(file)
+        if (file) {
+          const formData = new FormData();
+          formData.append('image', file);
+          formData.append('category', category);
+
+          console.log(formData)
+
+          fetch('/upload', {
+            method: 'POST',
+            body: formData
+          })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+        } else {
+          console.error('Please select an image to upload.');
+        }
+      }
+
+    }
+  </script>
+</body>
+
+</html>
