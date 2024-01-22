@@ -13,8 +13,8 @@ import fs from 'fs/promises'
 
 const files = await fs.readdir(`./uploadFolder`, {recursive:true});
 
-console.log(files);
-console.log(files.length);
+// console.log(files);
+// console.log(files.length);
 
 // Set up a MySQL connection pool
 const pool = mysql.createPool({
@@ -27,7 +27,7 @@ const pool = mysql.createPool({
 
 files.forEach(async file=>{
     let img = await datauri(`./uploadFolder/${file}`)
-    console.log(img)
+    // console.log(img)
     
     const imageBuffer = img;
     const imageName = file;
@@ -35,20 +35,37 @@ files.forEach(async file=>{
 
     pool.getConnection((err, connection) => {
         if (err) {
-            // res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error' });
             return;
         }
 
-        // Insert the image data into the database
-        const query = 'INSERT INTO scada_images (imageBlob, imageName, imageCategory) VALUES (?, ?, ?)';
-        connection.query(query, [imageBuffer, imageName, imageCategory], (queryErr, results) => {
-            connection.release();
+        const testQuery = `SELECT imageName FROM scada_images WHERE imageName = "${imageName}";`
+        connection.query(testQuery,(queryErr,results)=>{
+            console.log(testQuery)
+            console.log(results);
+            console.log(results.length);
+
+            if(results.length == 0){
+                // Insert the image data into the database
+                const query = 'INSERT INTO scada_images (imageBlob, imageName, imageCategory) VALUES (?, ?, ?)';
+                connection.query(query, [imageBuffer, imageName, imageCategory], (queryErr, results) => {
+                    connection.release();
+                    
+  
+
+                });
+            }
+
+            
+        })
 
 
-        });
+        
     });
 
 })
+
+
 
 
 
